@@ -1,4 +1,4 @@
-const CACHE="kontakty-md-v1";
+const CACHE="kontakty-md-v2";
 const FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png",
  "tesseract.min.js","worker.min.js","tesseract-core-simd-lstm.wasm.js","tesseract-core-lstm.wasm.js",
  "pol.traineddata.gz","eng.traineddata.gz"];

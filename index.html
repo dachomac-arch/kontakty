@@ -4,39 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kontakty MD</title>
-<meta name="theme-color" content="#8a1c22">
+<meta name="theme-color" content="#1d4f91">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 /* Layout: one column phone app, sticky search bar, list of people, bottom sheet for details and the scan form */
 :root{
-  --bg:#f5f2ee; --panel:#ffffff; --ink:#1f2226; --muted:#6c6f75; --line:#e4ded6;
-  --accent:#8a1c22; --accent-ink:#ffffff; --accent-soft:#f5e6e5; --chip:#eee9e2; --ok:#2f6b3a; --warn:#9a5b12;
+  --bg:#f2f5f9; --panel:#ffffff; --ink:#16202c; --muted:#5f6b7a; --line:#dde4ed;
+  --accent:#1d4f91; --accent-ink:#ffffff; --accent-soft:#e3ecf8; --chip:#e8eef5; --ok:#2f6b3a; --warn:#9a5b12;
+  --head:#173f75; --head-ink:#ffffff; --head-soft:rgba(255,255,255,.14);
   --font:"Segoe UI",Roboto,system-ui,-apple-system,Arial,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
-  :root{--bg:#16171a;--panel:#212327;--ink:#ecebe7;--muted:#9b9da2;--line:#30333a;
-  --accent:#d0585f;--accent-ink:#ffffff;--accent-soft:#3a2427;--chip:#2b2d33;--ok:#7fc28c;--warn:#e0a35a;color-scheme:dark}
+  :root{--bg:#0f141b;--panel:#18202a;--ink:#e6ecf3;--muted:#93a0b0;--line:#283342;
+  --accent:#6ea6ec;--accent-ink:#0b1626;--accent-soft:#1d2d44;--chip:#222c39;--ok:#7fc28c;--warn:#e0a35a;
+  --head:#13233a;--head-ink:#e6ecf3;--head-soft:rgba(255,255,255,.08);color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
-header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+header{position:sticky;top:0;z-index:5;background:var(--head);color:var(--head-ink);
   padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px))}
 .top{display:flex;align-items:center;gap:10px}
 .top h1{font-size:18px;margin:0;font-weight:700;flex:1}
-.top h1 span{color:var(--accent)}
+.top h1 span{opacity:.7;font-weight:500}
 .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 11px;cursor:pointer}
-#q{width:100%;margin-top:10px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+header .iconbtn{background:var(--head-soft);border-color:transparent;color:var(--head-ink)}
+#q{width:100%;margin-top:10px;padding:11px 13px;border:0;border-radius:12px;background:var(--panel);color:var(--ink);font-size:16px}
 #q:focus,input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:0;background:var(--chip);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap}
-.chip.on{background:var(--accent);color:var(--accent-ink)}
+.chip{flex:none;border:0;background:var(--head-soft);color:var(--head-ink);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--head-ink);color:var(--head)}
 main{padding:6px max(14px,env(safe-area-inset-right,0px)) 110px max(14px,env(safe-area-inset-left,0px))}
 .count{font-size:12px;color:var(--muted);margin:8px 2px}
 .letter{font-size:12px;font-weight:700;color:var(--accent);margin:14px 2px 4px}
@@ -44,7 +47,17 @@ main{padding:6px max(14px,env(safe-area-inset-right,0px)) 110px max(14px,env(saf
   border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer}
 .list{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
 .av{flex:none;width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .row .t{min-width:0;flex:1}
+.hero{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.bigav{flex:none;width:76px;height:76px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;overflow:hidden}
+.bigav img{width:100%;height:100%;object-fit:cover}
+.hero h2{margin:0;font-size:20px;line-height:1.25}
+.hero p{margin:4px 0 0;color:var(--muted)}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;padding:4px 0;cursor:pointer;font-size:13px}
+.dupc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.dupc b{display:block}.dupc small{color:var(--muted);display:block;margin:2px 0 8px}
+.why{display:inline-block;font-size:11px;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 6px;margin-right:4px}
 .row b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin-top:16px}
@@ -84,7 +97,7 @@ details.raw{margin-top:10px;font-size:13px;color:var(--muted)}
 details.raw pre{white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink)}
 .menu .btn{display:block;width:100%;text-align:left;margin-bottom:8px;font-weight:500}
 .note{font-size:13px;color:var(--muted);line-height:1.5}
-.dup{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.dup{background:var(--accent-soft);border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
 #toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;
   background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:40;transition:.25s;max-width:90%;text-align:center;pointer-events:none}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -105,6 +118,8 @@ details.raw pre{white-space:pre-wrap;background:var(--panel);border:1px solid va
 </div>
 <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
 <input type="file" id="galIn" accept="image/*" hidden>
+<input type="file" id="fotoCam" accept="image/*" capture="user" hidden>
+<input type="file" id="fotoGal" accept="image/*" hidden>
 <input type="file" id="impIn" accept=".json,.vcf,application/json,text/vcard" hidden>
 <div class="sheet" id="sheet" hidden><div class="in" id="sheetIn"></div></div>
 <div id="toast" role="status"></div>
@@ -123,8 +138,8 @@ function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clea
 
 /* ---------- storage: IndexedDB ---------- */
 let dbp=null;
-function db(){ if(dbp) return dbp; dbp=new Promise((res,rej)=>{const r=indexedDB.open("kontakty_md",1);
-  r.onupgradeneeded=()=>{const d=r.result; d.createObjectStore("c",{keyPath:"id"}); d.createObjectStore("img",{keyPath:"id"});};
+function db(){ if(dbp) return dbp; dbp=new Promise((res,rej)=>{const r=indexedDB.open("kontakty_md",2);
+  r.onupgradeneeded=()=>{const d=r.result; ["c","img","foto"].forEach(n=>{ if(!d.objectStoreNames.contains(n)) d.createObjectStore(n,{keyPath:"id"}); });};
   r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}); return dbp; }
 async function tx(store,mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out);t.onerror=()=>rej(t.error);});}
 const getAll=()=>tx("c","readonly",s=>s.getAll());
@@ -133,10 +148,16 @@ const del=id=>tx("c","readwrite",s=>{s.delete(id);});
 const putImg=(id,blob)=>tx("img","readwrite",s=>s.put({id,blob}));
 const getImg=id=>tx("img","readonly",s=>s.get(id));
 const delImg=id=>tx("img","readwrite",s=>{s.delete(id);});
+const putFoto=(id,blob)=>tx("foto","readwrite",s=>s.put({id,blob}));
+const getFoto=id=>tx("foto","readonly",s=>s.get(id));
+const delFoto=id=>tx("foto","readwrite",s=>{s.delete(id);});
+const fotoKeys=()=>tx("foto","readonly",s=>s.getAllKeys());
+let fotoIds=new Set(); const fotoUrl=new Map();
+async function fotoSrc(id){ if(fotoUrl.has(id)) return fotoUrl.get(id); const f=await getFoto(id).catch(()=>null); const u=f&&f.blob?URL.createObjectURL(f.blob):""; fotoUrl.set(id,u); return u; }
 async function putMany(arr){const d=await db();return new Promise((res,rej)=>{const t=d.transaction("c","readwrite");const s=t.objectStore("c");arr.forEach(c=>s.put(c));t.oncomplete=res;t.onerror=()=>rej(t.error);});}
 
 let data=[], st={q:"",cat:""};
-async function reload(){ try{ data=await getAll(); }catch(e){ data=[]; toast("Nie mogę otworzyć bazy w przeglądarce"); } render(); }
+async function reload(){ try{ data=await getAll(); }catch(e){ data=[]; toast("Nie mogę otworzyć bazy w przeglądarce"); } try{ fotoIds=new Set(await fotoKeys()); }catch(e){ fotoIds=new Set(); } countPhones(); render(); }
 const nextId=()=>data.reduce((m,c)=>Math.max(m,+c.id||0),0)+1;
 
 /* ---------- list ---------- */
@@ -174,11 +195,12 @@ function render(){
     else if(st.q && !open){ html+=`<div class="list">`; open=true; }
     const ini=((c.imie||"")[0]||"")+((c.nazwisko||c.instytucja||"")[0]||"");
     const sub=[c.stanowisko,c.instytucja].filter(Boolean).join(" · ")||c.kraj||"";
-    html+=`<button class="row" data-id="${c.id}"><span class="av">${esc(ini.toUpperCase())}</span><span class="t"><b>${esc(full(c))}</b><small>${esc(sub)}</small></span></button>`;
+    html+=`<button class="row" data-id="${c.id}"><span class="av" ${fotoIds.has(c.id)?`data-foto="${c.id}"`:""}>${esc(ini.toUpperCase())}</span><span class="t"><b>${esc(full(c))}</b><small>${esc(sub)}</small></span></button>`;
   });
   if(open) html+="</div>";
   if(!list.length) html+=`<div class="empty"><p>Nic nie znaleziono dla „${esc(st.q)}”.</p></div>`;
   m.innerHTML=html;
+  m.querySelectorAll("[data-foto]").forEach(async el=>{ const u=await fotoSrc(+el.dataset.foto); if(u) el.innerHTML=`<img alt="" src="${u}">`; });
 }
 
 /* ---------- sheet ---------- */
@@ -198,8 +220,12 @@ async function showContact(id){
   add("Kraj",esc([c.kraj,c.miasto].filter(Boolean).join(", "))); add("Adres",esc(c.adres),c.adres);
   add("Gdzie poznany",esc(c.gdzie)); add("Data",esc(c.data)); add("Notatki",esc(c.notatki)); add("Do weryfikacji",esc(c.weryfikacja)); add("Źródło",esc(c.zrodlo));
   let img=null; try{ img=await getImg(c.id); }catch(e){}
-  openSheet(`<div class="shead"><h2>${esc(full(c))}</h2><button class="iconbtn" data-close>✕</button></div>
-   <p class="sub">${esc([c.stanowisko,c.instytucja].filter(Boolean).join(" · "))}</p>
+  const fu=fotoIds.has(c.id)?await fotoSrc(c.id):"";
+  const ini=((c.imie||"")[0]||"")+((c.nazwisko||c.instytucja||"")[0]||"");
+  openSheet(`<div class="shead"><span style="flex:1"></span><button class="iconbtn" data-close>✕</button></div>
+   <div class="hero"><div class="bigav">${fu?`<img alt="" src="${fu}">`:esc(ini.toUpperCase())}</div>
+    <div style="min-width:0"><h2>${esc(full(c))}</h2><p>${esc([c.stanowisko,c.instytucja].filter(Boolean).join(" · "))}</p>
+    <div><button class="linkbtn" data-fotocam="${c.id}">Zrób zdjęcie</button> · <button class="linkbtn" data-fotogal="${c.id}">Z galerii</button>${fu?` · <button class="linkbtn" data-fotodel="${c.id}">Usuń zdjęcie</button>`:""}</div></div></div>
    <div class="acts"><button class="btn" data-edit="${c.id}">Edytuj</button><button class="btn" data-vcf="${c.id}">Zapisz w telefonie</button></div>
    <div class="card">${rows.join("")||'<div class="kv"><span class="v note">Brak danych kontaktowych</span></div>'}</div>
    ${img&&img.blob?`<img class="photo" alt="Zdjęcie wizytówki" src="${URL.createObjectURL(img.blob)}">`:""}
@@ -231,9 +257,9 @@ function editContact(id){
 function addManual(){
   const c={kategoria:"Inne",data:today()};
   openSheet(`<div class="shead"><h2>Nowy kontakt</h2><button class="iconbtn" data-close>✕</button></div>${formHtml(c)}
+   <div id="dupBox"></div>
    <div class="acts" style="margin-top:16px"><button class="btn" data-close>Anuluj</button><button class="btn primary" id="saveNew">Dodaj</button></div>`);
-  $("#saveNew").onclick=async()=>{ const o=readForm(c); if(!(o.imie||o.nazwisko||o.instytucja)){toast("Wpisz imię, nazwisko albo instytucję");return;}
-    o.id=nextId(); o.zrodlo=o.zrodlo||"Dodany w telefonie"; o.zmiana=today(); await put(o); await reload(); toast("Dodano kontakt"); showContact(o.id); };
+  wireNewForm(c,null,"saveNew");
 }
 
 /* ---------- vCard / export ---------- */
@@ -269,6 +295,67 @@ function sameAs(a,b){
   const m=s=>norm(s).split(/[,;\s]+/).filter(x=>x.includes("@"));
   const am=m(a.email); if(am.length && m(b.email).some(x=>am.includes(x))) return true;
   return a.nazwisko && norm(a.nazwisko)===norm(b.nazwisko) && norm(a.imie).split(" ")[0]===norm(b.imie).split(" ")[0];
+}
+/* ---------- duplicates ---------- */
+const mailsOf=c=>norm(c.email).split(/[,;\s]+/).filter(x=>x.includes("@"));
+const phonesOf=c=>[c.telKom,c.telInny].map(v=>String(v||"").replace(/\D/g,"")).filter(d=>d.length>=9).map(d=>d.slice(-9));
+const fn=c=>norm(c.imie).split(/\s+/)[0]||"";
+let phoneFreq=new Map();
+function countPhones(){ phoneFreq=new Map(); data.forEach(c=>new Set(phonesOf(c)).forEach(x=>phoneFreq.set(x,(phoneFreq.get(x)||0)+1))); }
+function lev(a,b){ if(Math.abs(a.length-b.length)>1) return 9; const m=[...Array(b.length+1).keys()]; for(let i=1;i<=a.length;i++){ let prev=m[0]; m[0]=i; for(let j=1;j<=b.length;j++){ const t=m[j]; m[j]=Math.min(m[j]+1,m[j-1]+1,prev+(a[i-1]===b[j-1]?0:1)); prev=t; } } return m[b.length]; }
+function dupReasons(o,c){
+  const r=[]; let strong=false;
+  const om=mailsOf(o); if(om.length && mailsOf(c).some(x=>om.includes(x))){ r.push("ten sam e-mail"); strong=true; }
+  const op=phonesOf(o).filter(x=>(phoneFreq.get(x)||0)<3); const samePhone=op.length && phonesOf(c).some(x=>op.includes(x));
+  const on=norm(o.nazwisko).trim(), cn=norm(c.nazwisko).trim(), of=fn(o), cf=fn(c);
+  if(on && cn){
+    if(on===cn && of && of===cf){ r.push("to samo imię i nazwisko"); strong=true; }
+    else if(of && on===cf && of===cn){ r.push("imię i nazwisko zamienione"); strong=true; }
+    else if(on===cn && of && cf && of[0]===cf[0]){ r.push("podobne imię, to samo nazwisko"); }
+    else if(on.length>=4 && of && of===cf && lev(on,cn)<=1){ r.push("podobne nazwisko"); }
+    else if(on===cn && !of){ r.push("to samo nazwisko"); }
+  } else if(!on && !cn && o.instytucja && norm(o.instytucja)===norm(c.instytucja)){ r.push("ta sama instytucja"); }
+  if(samePhone){ if(r.length) strong=true; r.push(r.length?"ten sam telefon":"ten sam telefon, może biuro"); }
+  return r.length?{r,strong,phoneOnly:samePhone&&r.length===1}:null;
+}
+function findDups(o,exclude){ return data.filter(c=>c.id!==exclude).map(c=>{const d=dupReasons(o,c);return d?{c,...d}:null;}).filter(Boolean).sort((a,b)=>(b.strong-a.strong)||(b.r.length-a.r.length)).slice(0,4); }
+function mergeInto(t,o){
+  FIELDS.forEach(([k])=>{ const v=String(o[k]||"").trim(); if(!v) return;
+    if(!t[k]){ t[k]=v; return; }
+    if(norm(t[k])===norm(v)) return;
+    if(k==="notatki") { if(!norm(t[k]).includes(norm(v))) t[k]+=". "+v; }
+    else if(k==="gdzie") { if(!norm(t[k]).includes(norm(v))) t[k]+="; "+v; }
+    else if(k==="email"){ const nm=mailsOf(o).filter(m=>!norm(t.email+" "+t.notatki).includes(m)); if(nm.length) t.notatki=(t.notatki?t.notatki+". ":"")+"Inny e-mail "+nm.join(", "); }
+    else if(k==="telKom"||k==="telInny"){ const d=v.replace(/\D/g,"").slice(-9); if(d.length>=9 && !String(t.telKom+" "+t.telInny+" "+t.notatki).replace(/\D/g,"").includes(d)) t.notatki=(t.notatki?t.notatki+". ":"")+"Inny telefon "+v; }
+  });
+  t.zmiana=today(); return t;
+}
+function dupHtml(list,label){
+  if(!list.length) return "";
+  return `<div class="dup"><b>${label}</b>${list.map(x=>`<div class="dupc"><b>${esc(full(x.c))}</b><small>${esc([x.c.stanowisko,x.c.instytucja].filter(Boolean).join(" · ")||x.c.email||x.c.telKom)}</small>
+    <div style="margin-bottom:8px">${x.r.map(t=>`<span class="why">${esc(t)}</span>`).join("")}</div>
+    <button class="btn" data-mergeto="${x.c.id}">Uzupełnij ten kontakt</button></div>`).join("")}
+    <button class="btn wide" style="margin-top:10px" data-forcenew>To inna osoba, dodaj jako nowy</button></div>`;
+}
+/* form flow shared by manual add and scan */
+function wireNewForm(base,imgBlob,btnId){
+  let forced=false;
+  const box=$("#dupBox");
+  const check=()=>{ const o=readForm(base); const list=findDups(o); box.innerHTML=dupHtml(list,list.some(x=>x.strong)?"Ta osoba chyba już jest na liście":"Podobny kontakt jest już na liście"); return list; };
+  ["imie","nazwisko","email","telKom","telInny"].forEach(k=>{ const e=$("#f_"+k); if(e) e.addEventListener("change",()=>{forced=false;check();}); });
+  const save=async(targetId)=>{
+    const o=readForm(base); if(!(o.imie||o.nazwisko||o.instytucja)){toast("Wpisz imię, nazwisko albo instytucję");return;}
+    let id;
+    if(targetId){ const t=data.find(c=>c.id===targetId); mergeInto(t,o); await put(t); id=t.id; }
+    else { o.id=nextId(); o.zrodlo=o.zrodlo||"Dodany w telefonie"; o.zmiana=today(); await put(o); id=o.id; }
+    if(imgBlob){ try{ await putImg(id,imgBlob); }catch(e){} }
+    await reload(); toast(targetId?"Uzupełniono istniejący kontakt":"Dodano kontakt"); showContact(id);
+  };
+  box.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.mergeto) save(+b.dataset.mergeto);
+    if(b.matches("[data-forcenew]")) { forced=true; save(null); } });
+  $("#"+btnId).onclick=()=>{ const list=check(); if(list.length && !forced){ box.scrollIntoView({behavior:"smooth",block:"center"}); toast("Sprawdź, czy to nie ta sama osoba"); return; } save(null); };
+  check();
 }
 async function importItems(items){
   let nowe=0,uzup=0; const changed=[]; let id=nextId();
@@ -391,23 +478,15 @@ async function scanFile(file){
     const r=await w.recognize(canvas);
     const c=parseCard(r.data.text||"");
     c.gdzie=""; c.data=today(); c.zrodlo="Wizytówka (skan w telefonie)";
-    const dup=data.find(x=>sameAs(c,x)&&(c.nazwisko||c.email));
     const url=URL.createObjectURL(keep);
     openSheet(`<div class="shead"><h2>Sprawdź i zapisz</h2><button class="iconbtn" data-close>✕</button></div>
       <img class="photo" alt="Zdjęcie wizytówki" src="${url}">
-      ${dup?`<div class="dup">Taki kontakt już jest: <b>${esc(full(dup))}</b>. Zapisanie uzupełni tylko jego puste pola.</div>`:""}
+      <div id="dupBox"></div>
       ${formHtml(c)}
       <details class="raw"><summary>Odczytany tekst</summary><pre>${esc(r.data.text||"")}</pre></details>
       <div class="acts" style="margin-top:16px"><button class="btn" id="again">Zrób nowe zdjęcie</button><button class="btn primary" id="saveScan">Zapisz kontakt</button></div>`);
     $("#again").onclick=()=>$("#camIn").click();
-    $("#saveScan").onclick=async()=>{
-      const o=readForm(c); if(!(o.imie||o.nazwisko||o.instytucja)){toast("Wpisz przynajmniej imię, nazwisko albo instytucję");return;}
-      let id;
-      if(dup){ FIELDS.forEach(([k])=>{ if(o[k]&&!dup[k]) dup[k]=o[k]; }); dup.zmiana=today(); await put(dup); id=dup.id; }
-      else { o.id=nextId(); o.zmiana=today(); await put(o); id=o.id; }
-      try{ await putImg(id,keep); }catch(e){}
-      await reload(); toast(dup?"Uzupełniono istniejący kontakt":"Dodano kontakt z wizytówki"); showContact(id);
-    };
+    wireNewForm(c,keep,"saveScan");
   }catch(err){
     console.error(err);
     openSheet(`<div class="shead"><h2>Nie udało się odczytać</h2><button class="iconbtn" data-close>✕</button></div>
@@ -416,6 +495,18 @@ async function scanFile(file){
     $("#manual").onclick=addManual;
   }finally{ ocrBusy=false; }
 }
+let fotoFor=null;
+async function setFoto(file){
+  if(!file||!fotoFor) return;
+  try{ const bmp=await createImageBitmap(file); const s=Math.min(bmp.width,bmp.height); const out=400;
+    const cv=document.createElement("canvas"); cv.width=cv.height=out;
+    cv.getContext("2d").drawImage(bmp,(bmp.width-s)/2,(bmp.height-s)/2*0.6,s,s,0,0,out,out);
+    const blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.85));
+    await putFoto(fotoFor,blob); fotoUrl.delete(fotoFor); fotoIds.add(fotoFor); render(); showContact(fotoFor); toast("Dodano zdjęcie");
+  }catch(e){ toast("Nie udało się wczytać zdjęcia"); }
+}
+$("#fotoCam").onchange=e=>{const f=e.target.files[0]; e.target.value=""; setFoto(f);};
+$("#fotoGal").onchange=e=>{const f=e.target.files[0]; e.target.value=""; setFoto(f);};
 $("#camIn").onchange=e=>{const f=e.target.files[0]; e.target.value=""; scanFile(f);};
 $("#galIn").onchange=e=>{const f=e.target.files[0]; e.target.value=""; scanFile(f);};
 
@@ -424,6 +515,7 @@ function showMenu(){
   openSheet(`<div class="shead"><h2>Menu</h2><button class="iconbtn" data-close>✕</button></div>
    <div class="menu">
     <button class="btn" id="mGal">Skanuj wizytówkę ze zdjęcia w galerii</button>
+    <button class="btn" id="mDup">Znajdź powtarzające się kontakty</button>
     <button class="btn" id="mImp">Wczytaj kontakty z pliku (.json lub .vcf)</button>
     <button class="btn" id="mExp">Zapisz kopię zapasową (.json)</button>
     <button class="btn" id="mVcf">Eksportuj wszystkie do kontaktów telefonu (.vcf)</button>
@@ -434,6 +526,7 @@ function showMenu(){
    <p class="note" id="offInfo"></p>`);
   $("#mGal").onclick=()=>$("#galIn").click();
   $("#mImp").onclick=()=>$("#impIn").click();
+  $("#mDup").onclick=showDupList;
   $("#mExp").onclick=()=>download(`${stamp()}_Kontakty_kopia.json`,JSON.stringify({format:"kontakty-md",wersja:1,eksport:today(),kontakty:data},null,1),"application/json");
   $("#mVcf").onclick=()=>download(`${stamp()}_Kontakty.vcf`,data.map(vcard).join("\r\n"),"text/vcard");
   $("#mCsv").onclick=()=>{ const q=v=>`"${String(v??"").replace(/"/g,'""')}"`; const csv="\ufeff"+FIELDS.map(f=>q(f[1])).join(";")+"\n"+data.map(c=>FIELDS.map(([k])=>q(c[k])).join(";")).join("\n"); download(`${stamp()}_Kontakty.csv`,csv,"text/csv"); };
@@ -441,10 +534,38 @@ function showMenu(){
     $("#clrNo").onclick=showMenu; $("#clrYes").onclick=async()=>{ await tx("c","readwrite",s=>{s.clear();}); await tx("img","readwrite",s=>{s.clear();}); closeSheet(); await reload(); toast("Usunięto dane"); }; };
   offlineInfo();
 }
+function ignored(){ try{ return new Set(JSON.parse(localStorage.getItem("kontakty_md_dupok")||"[]")); }catch(e){ return new Set(); } }
+function ignore(k){ const s=ignored(); s.add(k); try{ localStorage.setItem("kontakty_md_dupok",JSON.stringify([...s])); }catch(e){} }
+function dupPairs(){
+  const ig=ignored(), out=[];
+  for(let i=0;i<data.length;i++) for(let j=i+1;j<data.length;j++){
+    const a=data[i], b=data[j]; const k=Math.min(a.id,b.id)+"-"+Math.max(a.id,b.id); if(ig.has(k)) continue;
+    const d=dupReasons(a,b); if(d && !d.phoneOnly) out.push({a,b,k,...d});
+  }
+  return out.sort((x,y)=>y.strong-x.strong);
+}
+function showDupList(){
+  const pairs=dupPairs().slice(0,60);
+  openSheet(`<div class="shead"><h2>Powtarzające się kontakty</h2><button class="iconbtn" data-close>✕</button></div>
+   <p class="note">${pairs.length?"Sprawdź pary. „Połącz” przenosi brakujące dane do pierwszego kontaktu i usuwa drugi.":"Nie znalazłem powtórzeń."}</p>
+   <div id="pairs">${pairs.map(p=>`<div class="dupc" data-k="${p.k}"><div style="margin-bottom:6px">${p.r.map(t=>`<span class="why">${esc(t)}</span>`).join("")}</div>
+     <b>1. ${esc(full(p.a))}</b><small>${esc([p.a.stanowisko,p.a.instytucja].filter(Boolean).join(" · "))}</small>
+     <b>2. ${esc(full(p.b))}</b><small>${esc([p.b.stanowisko,p.b.instytucja].filter(Boolean).join(" · "))}</small>
+     <div class="confirm"><button class="btn primary" data-join="${p.a.id}:${p.b.id}">Połącz</button><button class="btn" data-skip="${p.k}">To różne osoby</button></div></div>`).join("")}</div>`);
+  $("#pairs").onclick=async e=>{ const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.skip){ ignore(b.dataset.skip); b.closest(".dupc").remove(); return; }
+    if(b.dataset.join){ const [ia,ib]=b.dataset.join.split(":").map(Number); const a=data.find(c=>c.id===ia), c2=data.find(c=>c.id===ib); if(!a||!c2) return;
+      mergeInto(a,c2); await put(a);
+      if(!fotoIds.has(ia)&&fotoIds.has(ib)){ const f=await getFoto(ib); if(f) await putFoto(ia,f.blob); }
+      const im=await getImg(ib).catch(()=>null); if(im&&im.blob&&!(await getImg(ia).catch(()=>null))) await putImg(ia,im.blob);
+      await del(ib); await delFoto(ib).catch(()=>{}); await delImg(ib).catch(()=>{});
+      await reload(); toast("Połączono"); showDupList(); }
+  };
+}
 async function offlineInfo(){
   const el=$("#offInfo"); if(!el) return;
   if(!("serviceWorker" in navigator)){ el.textContent="Ta przeglądarka nie zapisuje aplikacji do pracy offline."; return; }
-  const ok=await caches.has("kontakty-md-v1").catch(()=>false);
+  const ok=await caches.has("kontakty-md-v2").catch(()=>false);
   el.textContent=ok?"Aplikacja i moduł skanowania są zapisane w telefonie. Działa bez internetu.":"Aplikacja zapisuje się jeszcze w telefonie. Zostaw ją otwartą z internetem przez chwilę.";
 }
 
@@ -455,6 +576,9 @@ document.addEventListener("click",async e=>{
   if(t.classList.contains("row")) return showContact(+t.dataset.id);
   if(t.classList.contains("chip")){ st.cat=t.dataset.c; render(); window.scrollTo(0,0); return; }
   if(t.dataset.edit) return editContact(+t.dataset.edit);
+  if(t.dataset.fotocam){ fotoFor=+t.dataset.fotocam; return $("#fotoCam").click(); }
+  if(t.dataset.fotogal){ fotoFor=+t.dataset.fotogal; return $("#fotoGal").click(); }
+  if(t.dataset.fotodel){ const id=+t.dataset.fotodel; await delFoto(id).catch(()=>{}); fotoUrl.delete(id); fotoIds.delete(id); render(); return showContact(id); }
   if(t.dataset.vcf){ const c=data.find(x=>x.id===+t.dataset.vcf); download(fileName(c),vcard(c),"text/vcard"); toast("Otwórz pobrany plik, żeby dodać do kontaktów telefonu"); return; }
   if(t.dataset.cp){ try{ await navigator.clipboard.writeText(t.dataset.cp); toast("Skopiowano"); }catch(_){ toast(t.dataset.cp); } return; }
   if(t.dataset.delask){ const id=+t.dataset.delask; $("#delBox").innerHTML=`<p>Usunąć ten kontakt?</p><div class="confirm"><button class="btn" data-close>Nie</button><button class="btn danger" id="delYes">Tak, usuń</button></div>`;
