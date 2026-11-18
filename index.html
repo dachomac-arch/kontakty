@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kontakty MD</title>
+<meta name="theme-color" content="#8a1c22">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* Layout: one column phone app, sticky search bar, list of people, bottom sheet for details and the scan form */
+:root{
+  --bg:#f5f2ee; --panel:#ffffff; --ink:#1f2226; --muted:#6c6f75; --line:#e4ded6;
+  --accent:#8a1c22; --accent-ink:#ffffff; --accent-soft:#f5e6e5; --chip:#eee9e2; --ok:#2f6b3a; --warn:#9a5b12;
+  --font:"Segoe UI",Roboto,system-ui,-apple-system,Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#16171a;--panel:#212327;--ink:#ecebe7;--muted:#9b9da2;--line:#30333a;
+  --accent:#d0585f;--accent-ink:#ffffff;--accent-soft:#3a2427;--chip:#2b2d33;--ok:#7fc28c;--warn:#e0a35a;color-scheme:dark}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px))}
+.top{display:flex;align-items:center;gap:10px}
+.top h1{font-size:18px;margin:0;font-weight:700;flex:1}
+.top h1 span{color:var(--accent)}
+.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 11px;cursor:pointer}
+#q{width:100%;margin-top:10px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+#q:focus,input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;background:var(--chip);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);color:var(--accent-ink)}
+main{padding:6px max(14px,env(safe-area-inset-right,0px)) 110px max(14px,env(safe-area-inset-left,0px))}
+.count{font-size:12px;color:var(--muted);margin:8px 2px}
+.letter{font-size:12px;font-weight:700;color:var(--accent);margin:14px 2px 4px}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:var(--panel);
+  border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer}
+.list{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.av{flex:none;width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.row .t{min-width:0;flex:1}
+.row b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin-top:16px}
+.empty h2{margin:0 0 6px;font-size:18px}
+.empty p{margin:0 0 14px;color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:#b3262e;border-color:#e3b5b8}
+.btn.wide{width:100%}
+.fabs{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;align-items:flex-end;z-index:6}
+.fab{border:0;border-radius:16px;padding:14px 18px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}
+.fab.main{background:var(--accent);color:var(--accent-ink);font-size:16px}
+.fab.sec{background:var(--panel);color:var(--ink);font-size:14px;padding:10px 14px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.35);display:flex;align-items:flex-end}
+.sheet .in{background:var(--bg);width:100%;max-height:94%;overflow:auto;border-radius:18px 18px 0 0;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.shead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.shead h2{flex:1;margin:0;font-size:19px;line-height:1.25}
+.sub{color:var(--muted);margin:-4px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin-bottom:12px}
+.kv{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.kv:last-child{border-bottom:0}
+.kv .k{flex:none;width:96px;color:var(--muted);font-size:13px;padding-top:1px}
+.kv .v{flex:1;min-width:0;word-break:break-word}
+.kv a{color:var(--accent);text-decoration:none;font-weight:600}
+.cp{border:0;background:var(--chip);border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer;flex:none}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+label.f{display:block;margin:10px 0 0;font-size:13px;color:var(--muted)}
+label.f input,label.f select,label.f textarea{display:block;width:100%;margin-top:4px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:16px}
+label.f textarea{min-height:70px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.photo{width:100%;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;display:block}
+.status{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:14px}
+.bar{height:6px;background:var(--chip);border-radius:6px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+details.raw{margin-top:10px;font-size:13px;color:var(--muted)}
+details.raw pre{white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink)}
+.menu .btn{display:block;width:100%;text-align:left;margin-bottom:8px;font-weight:500}
+.note{font-size:13px;color:var(--muted);line-height:1.5}
+.dup{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:40;transition:.25s;max-width:90%;text-align:center;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.confirm{display:flex;gap:8px;margin-top:8px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>Kontakty <span>MD</span></h1><span id="net" class="note"></span><button class="iconbtn" id="menuBtn" aria-label="Menu">☰</button></div>
+  <input id="q" type="search" placeholder="Szukaj: nazwisko, instytucja, kraj, telefon…" autocomplete="off">
+  <div class="chips" id="chips"></div>
+</header>
+<main id="main"></main>
+<div class="fabs" id="fabs">
+  <button class="fab sec" id="addBtn">+ Dodaj ręcznie</button>
+  <button class="fab main" id="scanBtn">📷 Skanuj wizytówkę</button>
+</div>
+<input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+<input type="file" id="galIn" accept="image/*" hidden>
+<input type="file" id="impIn" accept=".json,.vcf,application/json,text/vcard" hidden>
+<div class="sheet" id="sheet" hidden><div class="in" id="sheetIn"></div></div>
+<div id="toast" role="status"></div>
+
+<script src="tesseract.min.js"></script>
+<script>
+"use strict";
+const CATS=["Administracja państwowa","Dyplomacja","Parlament i polityka","Wojsko i bezpieczeństwo","Instytucje UE i organizacje międzynarodowe","Think tank","Nauka","Fundacje i organizacje pozarządowe","Biznes","Kancelarie prawne i doradztwo","Media","Inne"];
+const FIELDS=[["tytul","Tytuł"],["imie","Imię"],["nazwisko","Nazwisko"],["stanowisko","Stanowisko"],["instytucja","Instytucja"],["jednostka","Jednostka"],["kategoria","Kategoria"],["sektor","Sektor"],["kraj","Kraj"],["miasto","Miasto"],["krajLok","Kraj lokalizacji"],["adres","Adres"],["telKom","Telefon kom."],["telInny","Telefon inny"],["email","E-mail"],["www","Strona www"],["gdzie","Gdzie poznany"],["data","Data poznania"],["notatki","Notatki"],["weryfikacja","Do weryfikacji"],["zrodlo","Źródło"]];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ł/g,"l").replace(/Ł/g,"L").toLowerCase();
+const full=c=>[c.tytul,c.imie,c.nazwisko].filter(Boolean).join(" ")||c.instytucja||"(bez nazwy)";
+const today=()=>new Date().toISOString().slice(0,10);
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2600);}
+
+/* ---------- storage: IndexedDB ---------- */
+let dbp=null;
+function db(){ if(dbp) return dbp; dbp=new Promise((res,rej)=>{const r=indexedDB.open("kontakty_md",1);
+  r.onupgradeneeded=()=>{const d=r.result; d.createObjectStore("c",{keyPath:"id"}); d.createObjectStore("img",{keyPath:"id"});};
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}); return dbp; }
+async function tx(store,mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out);t.onerror=()=>rej(t.error);});}
+const getAll=()=>tx("c","readonly",s=>s.getAll());
+const put=c=>tx("c","readwrite",s=>s.put(c));
+const del=id=>tx("c","readwrite",s=>{s.delete(id);});
+const putImg=(id,blob)=>tx("img","readwrite",s=>s.put({id,blob}));
+const getImg=id=>tx("img","readonly",s=>s.get(id));
+const delImg=id=>tx("img","readwrite",s=>{s.delete(id);});
+async function putMany(arr){const d=await db();return new Promise((res,rej)=>{const t=d.transaction("c","readwrite");const s=t.objectStore("c");arr.forEach(c=>s.put(c));t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+
+let data=[], st={q:"",cat:""};
+async function reload(){ try{ data=await getAll(); }catch(e){ data=[]; toast("Nie mogę otworzyć bazy w przeglądarce"); } render(); }
+const nextId=()=>data.reduce((m,c)=>Math.max(m,+c.id||0),0)+1;
+
+/* ---------- list ---------- */
+function filtered(){
+  const words=norm(st.q).split(/\s+/).filter(Boolean);
+  return data.filter(c=>{
+    if(st.cat && c.kategoria!==st.cat) return false;
+    if(!words.length) return true;
+    const h=norm(Object.values(c).join(" "))+" "+String(c.telKom+c.telInny).replace(/\D/g,"");
+    return words.every(w=>h.includes(w));
+  }).sort((a,b)=>norm(a.nazwisko||a.instytucja).localeCompare(norm(b.nazwisko||b.instytucja),"pl"));
+}
+function chips(){
+  const cnt={}; data.forEach(c=>cnt[c.kategoria]=(cnt[c.kategoria]||0)+1);
+  const cats=CATS.filter(k=>cnt[k]);
+  $("#chips").innerHTML=`<button class="chip ${st.cat?"":"on"}" data-c="">Wszystkie ${data.length}</button>`+
+    cats.map(k=>`<button class="chip ${st.cat===k?"on":""}" data-c="${esc(k)}">${esc(k)} ${cnt[k]}</button>`).join("");
+}
+function render(){
+  chips();
+  const m=$("#main");
+  if(!data.length){
+    m.innerHTML=`<div class="empty"><h2>Wczytaj swoją listę kontaktów</h2>
+    <p>Wybierz plik z kontaktami (np. 20261118_Kontakty_do_telefonu.json). Dane zostaną tylko w tym telefonie i będą działać bez internetu.</p>
+    <button class="btn primary wide" id="impFirst">Wczytaj plik z kontaktami</button>
+    <p class="note" style="margin-top:14px">Możesz też od razu zeskanować wizytówkę albo dodać kontakt ręcznie przyciskami na dole.</p></div>`;
+    $("#impFirst").onclick=()=>$("#impIn").click(); return;
+  }
+  const list=filtered(); const lim=st.q?list:list.slice(0,400);
+  let html=`<div class="count">${list.length} z ${data.length} kontaktów${list.length>lim.length?" · pokazuję pierwsze "+lim.length+", wpisz szukane":""}</div>`;
+  let cur=null, open=false;
+  lim.forEach(c=>{
+    const L=(norm(c.nazwisko||c.instytucja)[0]||"#").toUpperCase();
+    if(!st.q && L!==cur){ if(open) html+="</div>"; html+=`<div class="letter">${esc(L)}</div><div class="list">`; open=true; cur=L; }
+    else if(st.q && !open){ html+=`<div class="list">`; open=true; }
+    const ini=((c.imie||"")[0]||"")+((c.nazwisko||c.instytucja||"")[0]||"");
+    const sub=[c.stanowisko,c.instytucja].filter(Boolean).join(" · ")||c.kraj||"";
+    html+=`<button class="row" data-id="${c.id}"><span class="av">${esc(ini.toUpperCase())}</span><span class="t"><b>${esc(full(c))}</b><small>${esc(sub)}</small></span></button>`;
+  });
+  if(open) html+="</div>";
+  if(!list.length) html+=`<div class="empty"><p>Nic nie znaleziono dla „${esc(st.q)}”.</p></div>`;
+  m.innerHTML=html;
+}
+
+/* ---------- sheet ---------- */
+function openSheet(html){ $("#sheetIn").innerHTML=html; $("#sheet").hidden=false; $("#sheetIn").scrollTop=0; }
+function closeSheet(){ $("#sheet").hidden=true; $("#sheetIn").innerHTML=""; }
+$("#sheet").addEventListener("click",e=>{ if(e.target.id==="sheet") closeSheet(); });
+
+async function showContact(id){
+  const c=data.find(x=>x.id===id); if(!c) return;
+  const tel=v=>v?`<a href="tel:${esc(v.replace(/[^\d+]/g,""))}">${esc(v)}</a>`:"";
+  const rows=[];
+  const add=(k,v,cp)=>{ if(v) rows.push(`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span>${cp?`<button class="cp" data-cp="${esc(cp)}">Kopiuj</button>`:""}</div>`); };
+  add("Telefon",tel(c.telKom),c.telKom); add("Tel. inny",tel(c.telInny),c.telInny);
+  (c.email||"").split(/[,;\s]+/).filter(x=>x.includes("@")).forEach(m=>add("E-mail",`<a href="mailto:${esc(m)}">${esc(m)}</a>`,m));
+  if(c.www) add("Strona",`<a href="${esc(/^https?:/.test(c.www)?c.www:"https://"+c.www)}" target="_blank" rel="noopener">${esc(c.www)}</a>`);
+  add("Jednostka",esc(c.jednostka)); add("Kategoria",esc(c.kategoria)); add("Sektor",esc(c.sektor));
+  add("Kraj",esc([c.kraj,c.miasto].filter(Boolean).join(", "))); add("Adres",esc(c.adres),c.adres);
+  add("Gdzie poznany",esc(c.gdzie)); add("Data",esc(c.data)); add("Notatki",esc(c.notatki)); add("Do weryfikacji",esc(c.weryfikacja)); add("Źródło",esc(c.zrodlo));
+  let img=null; try{ img=await getImg(c.id); }catch(e){}
+  openSheet(`<div class="shead"><h2>${esc(full(c))}</h2><button class="iconbtn" data-close>✕</button></div>
+   <p class="sub">${esc([c.stanowisko,c.instytucja].filter(Boolean).join(" · "))}</p>
+   <div class="acts"><button class="btn" data-edit="${c.id}">Edytuj</button><button class="btn" data-vcf="${c.id}">Zapisz w telefonie</button></div>
+   <div class="card">${rows.join("")||'<div class="kv"><span class="v note">Brak danych kontaktowych</span></div>'}</div>
+   ${img&&img.blob?`<img class="photo" alt="Zdjęcie wizytówki" src="${URL.createObjectURL(img.blob)}">`:""}
+   <div id="delBox"><button class="btn danger wide" data-delask="${c.id}">Usuń kontakt</button></div>`);
+}
+
+function formHtml(c,extra=""){
+  const inp=(k,lab,type="text")=>`<label class="f">${lab}<input id="f_${k}" type="${type}" value="${esc(c[k]||"")}"></label>`;
+  return `${extra}
+   <div class="two">${inp("imie","Imię")}${inp("nazwisko","Nazwisko")}</div>
+   ${inp("tytul","Tytuł (np. dr, prof., amb.)")}
+   ${inp("stanowisko","Stanowisko")}${inp("instytucja","Instytucja")}${inp("jednostka","Jednostka / departament")}
+   <label class="f">Kategoria<select id="f_kategoria">${CATS.map(k=>`<option ${k===(c.kategoria||"Inne")?"selected":""}>${esc(k)}</option>`).join("")}</select></label>
+   <div class="two">${inp("telKom","Telefon komórkowy","tel")}${inp("telInny","Telefon inny","tel")}</div>
+   ${inp("email","E-mail","email")}${inp("www","Strona www")}
+   <div class="two">${inp("kraj","Kraj")}${inp("miasto","Miasto")}</div>
+   ${inp("adres","Adres")}${inp("sektor","Sektor / obszar")}
+   <div class="two">${inp("gdzie","Gdzie poznany")}${inp("data","Data poznania","date")}</div>
+   <label class="f">Notatki<textarea id="f_notatki">${esc(c.notatki||"")}</textarea></label>`;
+}
+function readForm(base){ const o={...base}; FIELDS.forEach(([k])=>{const e=$("#f_"+k); if(e) o[k]=e.value.trim();}); return o; }
+
+function editContact(id){
+  const c=data.find(x=>x.id===id)||{};
+  openSheet(`<div class="shead"><h2>Edytuj kontakt</h2><button class="iconbtn" data-close>✕</button></div>${formHtml(c)}
+   <div class="acts" style="margin-top:16px"><button class="btn" data-close>Anuluj</button><button class="btn primary" id="saveEdit">Zapisz</button></div>`);
+  $("#saveEdit").onclick=async()=>{ const o=readForm(c); o.zmiana=today(); await put(o); await reload(); toast("Zapisano"); showContact(o.id); };
+}
+function addManual(){
+  const c={kategoria:"Inne",data:today()};
+  openSheet(`<div class="shead"><h2>Nowy kontakt</h2><button class="iconbtn" data-close>✕</button></div>${formHtml(c)}
+   <div class="acts" style="margin-top:16px"><button class="btn" data-close>Anuluj</button><button class="btn primary" id="saveNew">Dodaj</button></div>`);
+  $("#saveNew").onclick=async()=>{ const o=readForm(c); if(!(o.imie||o.nazwisko||o.instytucja)){toast("Wpisz imię, nazwisko albo instytucję");return;}
+    o.id=nextId(); o.zrodlo=o.zrodlo||"Dodany w telefonie"; o.zmiana=today(); await put(o); await reload(); toast("Dodano kontakt"); showContact(o.id); };
+}
+
+/* ---------- vCard / export ---------- */
+function vcard(c){
+  const e=s=>String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/[,;]/g,m=>"\\"+m);
+  const L=["BEGIN:VCARD","VERSION:3.0",`N:${e(c.nazwisko)};${e(c.imie)};;${e(c.tytul)};`,`FN:${e(full(c))}`];
+  if(c.instytucja) L.push(`ORG:${e(c.instytucja)}${c.jednostka?";"+e(c.jednostka):""}`);
+  if(c.stanowisko) L.push(`TITLE:${e(c.stanowisko)}`);
+  if(c.telKom) L.push(`TEL;TYPE=CELL:${c.telKom}`); if(c.telInny) L.push(`TEL;TYPE=WORK:${c.telInny}`);
+  (c.email||"").split(/[,;\s]+/).filter(x=>x.includes("@")).forEach(m=>L.push(`EMAIL;TYPE=INTERNET:${m}`));
+  if(c.www) L.push(`URL:${e(c.www)}`);
+  if(c.adres||c.miasto||c.kraj) L.push(`ADR;TYPE=WORK:;;${e(c.adres)};${e(c.miasto)};;;${e(c.kraj)}`);
+  const n=[c.notatki,c.gdzie?"Poznany: "+c.gdzie:"",c.kategoria].filter(Boolean).join(" | "); if(n) L.push(`NOTE:${e(n)}`);
+  L.push("END:VCARD"); return L.join("\r\n");
+}
+function download(name,text,type){ const b=new Blob([text],{type}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000); }
+const stamp=()=>today().replace(/-/g,"");
+function fileName(c){ return (norm(full(c)).replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")||"kontakt")+".vcf"; }
+
+/* ---------- import ---------- */
+function parseVcf(t){
+  const out=[]; t.replace(/\r?\n[ \t]/g,"").split(/BEGIN:VCARD/i).slice(1).forEach(b=>{
+    const c={kategoria:"Inne",zrodlo:"Import .vcf"}; const get=re=>{const m=b.match(re);return m?m[1].trim():"";};
+    const n=get(/\nN[^:\n]*:([^\n]*)/i).split(";"); c.nazwisko=n[0]||""; c.imie=n[1]||""; c.tytul=n[3]||"";
+    if(!c.nazwisko&&!c.imie){ const fn=get(/\nFN[^:\n]*:([^\n]*)/i).split(" "); c.nazwisko=fn.pop()||""; c.imie=fn.join(" "); }
+    c.instytucja=get(/\nORG[^:\n]*:([^\n;]*)/i); c.stanowisko=get(/\nTITLE[^:\n]*:([^\n]*)/i);
+    const tels=[...b.matchAll(/\nTEL[^:\n]*:([^\n]*)/gi)].map(m=>m[1].trim()); c.telKom=tels[0]||""; c.telInny=tels[1]||"";
+    c.email=[...b.matchAll(/\nEMAIL[^:\n]*:([^\n]*)/gi)].map(m=>m[1].trim()).join(", "); c.www=get(/\nURL[^:\n]*:([^\n]*)/i); c.notatki=get(/\nNOTE[^:\n]*:([^\n]*)/i).replace(/\\n/g," ");
+    Object.keys(c).forEach(k=>c[k]=String(c[k]).replace(/\\([,;\\])/g,"$1")); out.push(c); });
+  return out;
+}
+function sameAs(a,b){
+  const m=s=>norm(s).split(/[,;\s]+/).filter(x=>x.includes("@"));
+  const am=m(a.email); if(am.length && m(b.email).some(x=>am.includes(x))) return true;
+  return a.nazwisko && norm(a.nazwisko)===norm(b.nazwisko) && norm(a.imie).split(" ")[0]===norm(b.imie).split(" ")[0];
+}
+async function importItems(items){
+  let nowe=0,uzup=0; const changed=[]; let id=nextId();
+  for(const src of items){
+    const o={}; FIELDS.forEach(([k])=>o[k]=String(src[k]??"").trim()); if(!(o.imie||o.nazwisko||o.instytucja)) continue;
+    const hit=data.find(c=>sameAs(o,c))||changed.find(c=>sameAs(o,c));
+    if(hit){ let z=false; FIELDS.forEach(([k])=>{ if(o[k]&&!hit[k]){hit[k]=o[k];z=true;} }); if(z){uzup++; if(!changed.includes(hit)) changed.push(hit);} }
+    else { o.id=(src.id&&!data.some(c=>c.id===+src.id)&&!changed.some(c=>c.id===+src.id))?+src.id:id++; if(o.id>=id) id=o.id+1; changed.push(o); nowe++; }
+  }
+  await putMany(changed); await reload(); toast(`Wczytano. Nowe kontakty ${nowe}, uzupełnione ${uzup}.`);
+}
+$("#impIn").onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f) return;
+  try{ const t=await f.text(); let items;
+    if(/BEGIN:VCARD/i.test(t)) items=parseVcf(t);
+    else { const j=JSON.parse(t); items=Array.isArray(j)?j:(j.kontakty||[]); }
+    if(!items.length){toast("W pliku nie ma kontaktów");return;}
+    closeSheet(); await importItems(items);
+  }catch(err){ toast("Nie udało się odczytać pliku. Sprawdź, czy to .json albo .vcf."); }
+};
+
+/* ---------- OCR ---------- */
+let ocrWorker=null, ocrBusy=false;
+async function getWorker(progress){
+  if(ocrWorker) return ocrWorker;
+  const base=new URL("./",location.href).href;
+  ocrWorker=await Tesseract.createWorker(["pol","eng"],1,{
+    workerPath:base+"worker.min.js", corePath:base, langPath:base.replace(/\/$/,""), gzip:true, workerBlobURL:false,
+    logger:m=>progress&&progress(m)});
+  await ocrWorker.setParameters({tessedit_pageseg_mode:"3"});
+  return ocrWorker;
+}
+async function prepImage(file){
+  const bmp=await createImageBitmap(file);
+  const scale=Math.min(1,2000/Math.max(bmp.width,bmp.height));
+  const cv=document.createElement("canvas"); cv.width=Math.round(bmp.width*scale); cv.height=Math.round(bmp.height*scale);
+  const x=cv.getContext("2d"); x.drawImage(bmp,0,0,cv.width,cv.height);
+  const keep=await new Promise(r=>{ const s=document.createElement("canvas"); const k=Math.min(1,900/Math.max(cv.width,cv.height)); s.width=cv.width*k; s.height=cv.height*k; s.getContext("2d").drawImage(cv,0,0,s.width,s.height); s.toBlob(r,"image/jpeg",.8); });
+  const im=x.getImageData(0,0,cv.width,cv.height), d=im.data; let sum=0;
+  for(let i=0;i<d.length;i+=4){ const g=.299*d[i]+.587*d[i+1]+.114*d[i+2]; d[i]=d[i+1]=d[i+2]=g; sum+=g; }
+  if(sum/(d.length/4)<110){ for(let i=0;i<d.length;i+=4){ d[i]=d[i+1]=d[i+2]=255-d[i]; } }
+  x.putImageData(im,0,0);
+  return {canvas:cv, keep};
+}
+const PREFIX={"48":"Polska","1":"USA","44":"Wielka Brytania","49":"Niemcy","380":"Ukraina","370":"Litwa","371":"Łotwa","372":"Estonia","46":"Szwecja","47":"Norwegia","45":"Dania","358":"Finlandia","33":"Francja","32":"Belgia","31":"Holandia","352":"Luksemburg","41":"Szwajcaria","43":"Austria","39":"Włochy","34":"Hiszpania","351":"Portugalia","30":"Grecja","385":"Chorwacja","386":"Słowenia","36":"Węgry","420":"Czechy","421":"Słowacja","40":"Rumunia","359":"Bułgaria","373":"Mołdawia","374":"Armenia","995":"Gruzja","994":"Azerbejdżan","90":"Turcja","972":"Izrael","971":"ZEA","974":"Katar","966":"Arabia Saudyjska","965":"Kuwejt","81":"Japonia","82":"Korea Płd.","86":"Chiny","886":"Tajwan","91":"Indie","92":"Pakistan","66":"Tajlandia","65":"Singapur","60":"Malezja","62":"Indonezja","84":"Wietnam","63":"Filipiny","61":"Australia","64":"Nowa Zelandia","233":"Ghana","234":"Nigeria","254":"Kenia","27":"RPA","20":"Egipt","212":"Maroko","51":"Peru","52":"Meksyk","55":"Brazylia","54":"Argentyna","56":"Chile","57":"Kolumbia","7":"Kazachstan / Rosja","998":"Uzbekistan","996":"Kirgistan","992":"Tadżykistan","993":"Turkmenistan"};
+function countryFromPhone(p){ const d=String(p||"").replace(/[^\d+]/g,""); if(!d.startsWith("+")&&!d.startsWith("00")) return ""; const n=d.replace(/^\+|^00/,""); for(const l of [3,2,1]){ if(PREFIX[n.slice(0,l)]) return PREFIX[n.slice(0,l)]; } return ""; }
+const TITLE_RE=/\b(director|dyrektor|prezes|wiceprezes|president|vice|chair|chairman|ceo|cfo|cto|coo|founder|co-founder|założyciel|head|manager|menedżer|kierownik|naczelnik|officer|adviser|advisor|doradca|ekspert|expert|specialist|specjalista|analyst|analityk|ambassador|ambasador|consul|konsul|counsellor|counselor|radca|minister|attach[eé]|secretary|sekretarz|sekretarz stanu|deputy|zastępca|partner|associate|counsel|adwokat|radca prawny|attorney|lawyer|professor|profesor|researcher|fellow|coordinator|koordynator|członek|member|board|zarządu|representative|przedstawiciel|lead|engineer|inżynier|consultant|konsultant|editor|redaktor|journalist|dziennikarz|colonel|pułkownik|general|generał|commander|dowódca|major|captain|kapitan|admiral|admirał|senator|poseł|mp|mep|rector|rektor|dean|dziekan|owner|właściciel|executive|business development|sales|press)\b/i;
+const ORG_RE=/\b(sp\.? ?z ?o\.? ?o\.?|s\.? ?a\.?|sp\.? ?k\.?|ltd|llc|llp|inc|gmbh|ag|bv|nv|plc|s\.r\.l|srl|sas|oy|ab|as|corp|corporation|company|group|grupa|holding|foundation|fundacja|institute|instytut|university|uniwersytet|politechnika|akademia|academy|college|centre|center|centrum|ministry|ministerstwo|embassy|ambasada|konsulat|consulate|agency|agencja|bank|council|rada|office|urząd|biuro|kancelaria|association|stowarzyszenie|society|forum|parliament|sejm|senat|commission|komisja|nato|osce|obwe|un|unesco|unicef|undp|european|europejsk|national|narodow|krajow|polska|polish|international|global|solutions|systems|technologies|technology|consulting|partners|media|press|tv|radio|news|army|forces|wojsk|command|dowództwo)\b/i;
+const ADDR_RE=/\b(ul\.|al\.|aleja|ulica|pl\.|plac|street|str\.|st\.|avenue|ave\.?|road|rd\.?|blvd|boulevard|strasse|straße|rue|via|calle|floor|piętro|suite|building|budynek|p\.o\. box|\d{2}-\d{3}|\d{4,5} [A-ZŁŚŻ][a-ząćęłńóśźż]+)\b/i;
+function parseCard(text){
+  const raw=text.replace(/[|_]{2,}/g," ").split(/\n/).map(s=>s.replace(/\s{2,}/g," ").trim()).filter(s=>s.length>1);
+  const c={imie:"",nazwisko:"",tytul:"",stanowisko:"",instytucja:"",jednostka:"",telKom:"",telInny:"",email:"",www:"",adres:"",miasto:"",kraj:"",kategoria:"Inne",notatki:""};
+  const used=new Set();
+  const all=raw.join("\n");
+  const emails=[...new Set((all.match(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g)||[]).map(s=>s.replace(/[.,;]$/,"")))];
+  if(!emails.length){
+    const dm=(all.match(/www\.([A-Za-z0-9.\-]+\.[A-Za-z]{2,})/i)||[])[1];
+    const toks=all.split(/\s+/);
+    toks.forEach(tk=>{ tk=tk.replace(/[.,;]$/,"");
+      if(dm&&tk.toLowerCase().endsWith(dm.toLowerCase())&&tk.length>dm.length+2&&!/^www\./i.test(tk)){ emails.push(tk.slice(0,tk.length-dm.length-1)+"@"+tk.slice(-dm.length)); }
+      else if(/^[A-Za-z0-9._%+\-]+[©®]\s?[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$/.test(tk)){ emails.push(tk.replace(/[©®]\s?/,"@")); }
+    });
+  }
+  c.email=emails.join(", ");
+  const webs=(all.match(/\b(?:https?:\/\/)?(?:www\.)[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:\/\S*)?/gi)||[]).filter(w=>!w.includes("@"));
+  c.www=webs[0]||"";
+  if(!c.www&&emails[0]){ const dom=emails[0].split("@")[1].toLowerCase(); if(!/gmail|yahoo|outlook|hotmail|wp\.pl|o2\.pl|onet|interia|icloud|proton/.test(dom)) c.www="www."+dom; }
+  const phones=[];
+  raw.forEach((l,i)=>{
+    if(/@/.test(l)||emails.some(e=>l.includes(e.split("@")[0])&&l.includes(e.split("@")[1]))) used.add(i);
+    if(/www\.|https?:/i.test(l)&&!/@/.test(l)&&l.replace(/\S*(www\.|https?:)\S*/gi,"").trim().length<3) used.add(i);
+    const clean=l.replace(/[A-Za-z0-9._%+\-]+@\S+/g," ");
+    const re=/(?:\+|00)?\(?\d[\d\s().\/\-]{7,}\d/g; let m, left=clean;
+    while((m=re.exec(clean))){ const v=m[0], dg=v.replace(/\D/g,"");
+      if(dg.length<9||dg.length>15) continue;
+      const before=clean.slice(Math.max(0,m.index-10),m.index).toLowerCase();
+      phones.push({v:v.trim().replace(/\s+/g," "),mob:/(mob|kom|cell|gsm|\bm\b|m\.|m:)/.test(before),fax:/fax|\bf\b|f\.|f:/.test(before),land:/(tel|phone|office|\bt\b|t\.|t:|biuro)/.test(before)});
+      left=left.replace(v," ");
+    }
+    if(phones.length && left.replace(/(tel|phone|mobile|mob|kom|cell|gsm|fax|office|biuro|[tmfp])\.?:?/gi,"").replace(/[^A-Za-z0-9ąćęłńóśźż]/g,"").length<3) used.add(i);
+  });
+  const ph=phones.filter(p=>!p.fax);
+  const isPlMob=v=>{ const d=v.replace(/\D/g,"").replace(/^0048|^48(?=\d{9}$)/,""); return d.length===9&&/^(45|5|6|7|8)/.test(d); };
+  const mob=ph.find(p=>p.mob)||ph.find(p=>!p.land&&isPlMob(p.v))||ph.find(p=>isPlMob(p.v))||ph.find(p=>!p.land)||ph[0];
+  if(mob){ c.telKom=mob.v; const o=ph.find(p=>p!==mob); if(o) c.telInny=o.v; }
+  raw.forEach((l,i)=>{ if(!used.has(i)&&ADDR_RE.test(l)&&/\d/.test(l)){ c.adres=c.adres?c.adres+", "+l:l; used.add(i); const pc=l.match(/\d{2}-\d{3}\s+([A-ZŁŚŻĆ][\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ\-]+)/); if(pc) c.miasto=pc[1]; } });
+  const cand=raw.map((l,i)=>({l,i})).filter(x=>!used.has(x.i));
+  const isName=s=>{ const w=s.replace(/^(dr hab\.|dr|prof\.|mgr|inż\.|amb\.|h\.e\.|mr\.?|mrs\.?|ms\.?)\s+/i,"").split(/\s+/);
+    return w.length>=2&&w.length<=4&&w.every(x=>/^\p{Lu}[\p{L}'’\-]+$/u.test(x))&&!ORG_RE.test(s)&&!TITLE_RE.test(s)&&!/\d/.test(s); };
+  let nameIdx=cand.find(x=>isName(x.l)&&x.l!==x.l.toUpperCase())||cand.find(x=>isName(x.l));
+  if(nameIdx){ used.add(nameIdx.i); let s=nameIdx.l; const tm=s.match(/^(dr hab\.|dr|prof\.|mgr|inż\.|amb\.|h\.e\.)\s+/i); if(tm){c.tytul=tm[1];s=s.slice(tm[0].length);}
+    const w=s.split(/\s+/).map(x=>x===x.toUpperCase()?x[0]+x.slice(1).toLowerCase():x); c.nazwisko=w.pop(); c.imie=w.join(" "); }
+  const rest=raw.map((l,i)=>({l,i})).filter(x=>!used.has(x.i));
+  const t=rest.find(x=>TITLE_RE.test(x.l)&&!ORG_RE.test(x.l))||rest.find(x=>TITLE_RE.test(x.l));
+  if(t){ c.stanowisko=t.l; used.add(t.i); }
+  const o=raw.map((l,i)=>({l,i})).filter(x=>!used.has(x.i)).find(x=>ORG_RE.test(x.l));
+  if(o){ c.instytucja=o.l.charAt(0).toUpperCase()+o.l.slice(1); used.add(o.i); }
+  else if(emails[0]){ const dom=emails[0].split("@")[1].split(".").slice(-2)[0]; if(!/gmail|yahoo|outlook|hotmail|wp|o2|onet|interia|icloud|proton/.test(dom)) c.instytucja=dom.charAt(0).toUpperCase()+dom.slice(1); }
+  const left=raw.filter((l,i)=>!used.has(i)&&l.replace(/[^A-Za-ząćęłńóśźż]/g,"").length>=3);
+  if(left.length) c.notatki="Pozostały tekst z wizytówki: "+left.join(" · ");
+  c.kraj=countryFromPhone(c.telKom||c.telInny)||(/\.pl$/i.test(c.www)?"Polska":"");
+  if(/ambasad|embassy|consulat|konsulat/i.test(c.instytucja)) c.kategoria="Dyplomacja";
+  else if(/minist|urząd|office of|kancelaria prezes|agencja|agency|government/i.test(c.instytucja)) c.kategoria="Administracja państwowa";
+  else if(/sejm|senat|parliament|parlament/i.test(c.instytucja)) c.kategoria="Parlament i polityka";
+  else if(/army|forces|wojsk|nato|command|dowództw|defen[cs]e/i.test(c.instytucja)) c.kategoria="Wojsko i bezpieczeństwo";
+  else if(/univers|uniwersyt|politechn|akademi|institute of|instytut/i.test(c.instytucja)) c.kategoria="Nauka";
+  else if(/fundacj|foundation|stowarzysz|association/i.test(c.instytucja)) c.kategoria="Fundacje i organizacje pozarządowe";
+  else if(/kancelaria|law|legal|consult/i.test(c.instytucja)) c.kategoria="Kancelarie prawne i doradztwo";
+  else if(/sp\.? ?z|s\.a\.|ltd|llc|inc|gmbh|group|grupa|holding/i.test(c.instytucja)) c.kategoria="Biznes";
+  return c;
+}
+async function scanFile(file){
+  if(!file) return; if(ocrBusy){toast("Poczekaj, trwa odczyt poprzedniej wizytówki");return;}
+  ocrBusy=true;
+  openSheet(`<div class="shead"><h2>Odczytuję wizytówkę</h2></div><div class="status"><span id="ocrMsg">Przygotowuję zdjęcie…</span><div class="bar"><i id="ocrBar"></i></div></div>`);
+  try{
+    const {canvas,keep}=await prepImage(file);
+    const msg=$("#ocrMsg"), bar=$("#ocrBar");
+    const w=await getWorker(m=>{ if(!msg) return; if(m.status==="recognizing text"){ msg.textContent="Odczytuję tekst…"; bar.style.width=Math.round(m.progress*100)+"%"; } else if(/load|initializ/.test(m.status)){ msg.textContent="Uruchamiam moduł skanowania (pierwszy raz trwa dłużej)…"; } });
+    const r=await w.recognize(canvas);
+    const c=parseCard(r.data.text||"");
+    c.gdzie=""; c.data=today(); c.zrodlo="Wizytówka (skan w telefonie)";
+    const dup=data.find(x=>sameAs(c,x)&&(c.nazwisko||c.email));
+    const url=URL.createObjectURL(keep);
+    openSheet(`<div class="shead"><h2>Sprawdź i zapisz</h2><button class="iconbtn" data-close>✕</button></div>
+      <img class="photo" alt="Zdjęcie wizytówki" src="${url}">
+      ${dup?`<div class="dup">Taki kontakt już jest: <b>${esc(full(dup))}</b>. Zapisanie uzupełni tylko jego puste pola.</div>`:""}
+      ${formHtml(c)}
+      <details class="raw"><summary>Odczytany tekst</summary><pre>${esc(r.data.text||"")}</pre></details>
+      <div class="acts" style="margin-top:16px"><button class="btn" id="again">Zrób nowe zdjęcie</button><button class="btn primary" id="saveScan">Zapisz kontakt</button></div>`);
+    $("#again").onclick=()=>$("#camIn").click();
+    $("#saveScan").onclick=async()=>{
+      const o=readForm(c); if(!(o.imie||o.nazwisko||o.instytucja)){toast("Wpisz przynajmniej imię, nazwisko albo instytucję");return;}
+      let id;
+      if(dup){ FIELDS.forEach(([k])=>{ if(o[k]&&!dup[k]) dup[k]=o[k]; }); dup.zmiana=today(); await put(dup); id=dup.id; }
+      else { o.id=nextId(); o.zmiana=today(); await put(o); id=o.id; }
+      try{ await putImg(id,keep); }catch(e){}
+      await reload(); toast(dup?"Uzupełniono istniejący kontakt":"Dodano kontakt z wizytówki"); showContact(id);
+    };
+  }catch(err){
+    console.error(err);
+    openSheet(`<div class="shead"><h2>Nie udało się odczytać</h2><button class="iconbtn" data-close>✕</button></div>
+      <p>${navigator.onLine?"Spróbuj zrobić zdjęcie jeszcze raz, przy lepszym świetle i z wizytówką wypełniającą kadr.":"Moduł skanowania nie jest jeszcze zapisany w telefonie. Otwórz aplikację raz z internetem, potem skanowanie zadziała offline."}</p>
+      <div class="acts"><button class="btn" data-close>Zamknij</button><button class="btn primary" id="manual">Wpisz ręcznie</button></div>`);
+    $("#manual").onclick=addManual;
+  }finally{ ocrBusy=false; }
+}
+$("#camIn").onchange=e=>{const f=e.target.files[0]; e.target.value=""; scanFile(f);};
+$("#galIn").onchange=e=>{const f=e.target.files[0]; e.target.value=""; scanFile(f);};
+
+/* ---------- menu ---------- */
+function showMenu(){
+  openSheet(`<div class="shead"><h2>Menu</h2><button class="iconbtn" data-close>✕</button></div>
+   <div class="menu">
+    <button class="btn" id="mGal">Skanuj wizytówkę ze zdjęcia w galerii</button>
+    <button class="btn" id="mImp">Wczytaj kontakty z pliku (.json lub .vcf)</button>
+    <button class="btn" id="mExp">Zapisz kopię zapasową (.json)</button>
+    <button class="btn" id="mVcf">Eksportuj wszystkie do kontaktów telefonu (.vcf)</button>
+    <button class="btn" id="mCsv">Eksportuj do Excela (.csv)</button>
+    <div id="clrBox"><button class="btn danger" id="mClr">Usuń wszystkie dane z telefonu</button></div>
+   </div>
+   <p class="note">${data.length} kontaktów w pamięci telefonu. Dane nie są nigdzie wysyłane. Rób regularnie kopię zapasową, bo wyczyszczenie danych przeglądarki usuwa też kontakty.</p>
+   <p class="note" id="offInfo"></p>`);
+  $("#mGal").onclick=()=>$("#galIn").click();
+  $("#mImp").onclick=()=>$("#impIn").click();
+  $("#mExp").onclick=()=>download(`${stamp()}_Kontakty_kopia.json`,JSON.stringify({format:"kontakty-md",wersja:1,eksport:today(),kontakty:data},null,1),"application/json");
+  $("#mVcf").onclick=()=>download(`${stamp()}_Kontakty.vcf`,data.map(vcard).join("\r\n"),"text/vcard");
+  $("#mCsv").onclick=()=>{ const q=v=>`"${String(v??"").replace(/"/g,'""')}"`; const csv="\ufeff"+FIELDS.map(f=>q(f[1])).join(";")+"\n"+data.map(c=>FIELDS.map(([k])=>q(c[k])).join(";")).join("\n"); download(`${stamp()}_Kontakty.csv`,csv,"text/csv"); };
+  $("#mClr").onclick=()=>{ $("#clrBox").innerHTML=`<p>Na pewno usunąć wszystkie ${data.length} kontakty z tego telefonu?</p><div class="confirm"><button class="btn" id="clrNo">Nie</button><button class="btn danger" id="clrYes">Tak, usuń</button></div>`;
+    $("#clrNo").onclick=showMenu; $("#clrYes").onclick=async()=>{ await tx("c","readwrite",s=>{s.clear();}); await tx("img","readwrite",s=>{s.clear();}); closeSheet(); await reload(); toast("Usunięto dane"); }; };
+  offlineInfo();
+}
+async function offlineInfo(){
+  const el=$("#offInfo"); if(!el) return;
+  if(!("serviceWorker" in navigator)){ el.textContent="Ta przeglądarka nie zapisuje aplikacji do pracy offline."; return; }
+  const ok=await caches.has("kontakty-md-v1").catch(()=>false);
+  el.textContent=ok?"Aplikacja i moduł skanowania są zapisane w telefonie. Działa bez internetu.":"Aplikacja zapisuje się jeszcze w telefonie. Zostaw ją otwartą z internetem przez chwilę.";
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("button,a"); if(!t) return;
+  if(t.matches("[data-close]")) return closeSheet();
+  if(t.classList.contains("row")) return showContact(+t.dataset.id);
+  if(t.classList.contains("chip")){ st.cat=t.dataset.c; render(); window.scrollTo(0,0); return; }
+  if(t.dataset.edit) return editContact(+t.dataset.edit);
+  if(t.dataset.vcf){ const c=data.find(x=>x.id===+t.dataset.vcf); download(fileName(c),vcard(c),"text/vcard"); toast("Otwórz pobrany plik, żeby dodać do kontaktów telefonu"); return; }
+  if(t.dataset.cp){ try{ await navigator.clipboard.writeText(t.dataset.cp); toast("Skopiowano"); }catch(_){ toast(t.dataset.cp); } return; }
+  if(t.dataset.delask){ const id=+t.dataset.delask; $("#delBox").innerHTML=`<p>Usunąć ten kontakt?</p><div class="confirm"><button class="btn" data-close>Nie</button><button class="btn danger" id="delYes">Tak, usuń</button></div>`;
+    $("#delYes").onclick=async()=>{ await del(id); try{await delImg(id);}catch(_){} closeSheet(); await reload(); toast("Usunięto"); }; return; }
+});
+let qT; $("#q").addEventListener("input",e=>{ clearTimeout(qT); qT=setTimeout(()=>{ st.q=e.target.value; render(); },120); });
+$("#scanBtn").onclick=()=>$("#camIn").click();
+$("#addBtn").onclick=addManual;
+$("#menuBtn").onclick=showMenu;
+function netState(){ $("#net").textContent=navigator.onLine?"":"offline"; }
+addEventListener("online",netState); addEventListener("offline",netState); netState();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){}
+reload();
+</script>
+</body>
+</html>
